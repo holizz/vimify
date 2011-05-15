@@ -2,22 +2,31 @@ jQuery.fn.vimify = ->
   # Init stuff
 
   this.mode = 'normal'
+  this.textarea = this[0]
 
   # Functions
 
-  this.escape = =>
-    this.mode = 'normal'
+  this.functions =
+    escape: =>
+      this.mode = 'normal'
+    moveCursor: (x) =>
+      this.textarea.selectionStart += x
+      this.textarea.selectionEnd = this.textarea.selectionStart
 
   this.normalCommands =
     i: =>
       this.mode = 'insert'
+    h: =>
+      this.functions.moveCursor(-1)
+    l: =>
+      this.functions.moveCursor(+1)
 
   # Event "loop"
 
   this.keypress (e) =>
 
     if e.charCode == 27 # Esc
-      this.escape()
+      this.functions.escape()
       return false
 
     c = String.fromCharCode(e.charCode)
