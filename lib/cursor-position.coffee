@@ -33,7 +33,7 @@ jQuery.fn.cursorPosition = (x, y) ->
         n += v.match(re)[0].length
         v = v.replace(re, '')
 
-    m = v.match(re)
+    m = v.match(/^.*?(\n|$)/)
     if m
       if x < m[0].length
         n += x
