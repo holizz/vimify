@@ -33,12 +33,14 @@ jQuery.fn.cursorPosition = (x, y) ->
         n += v.match(re)[0].length
         v = v.replace(re, '')
 
-    m = v.match(/^.*?(\n|$)/)
-    if m
+    if m = v.match(/^.*?(\n|$)/)
       if x < m[0].length
         n += x
       else
-        n += m[0].length
+        if v.match(/^.*?$/)
+          n += m[0].length
+        else
+          n += m[0].length - 1
 
     this.textarea.selectionStart = n
     this.textarea.selectionEnd = this.textarea.selectionStart
