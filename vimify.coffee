@@ -7,14 +7,16 @@ class Vimify
     this.textarea = textarea
     if(typeof this.textarea != HTMLTextAreaElement)
       this.textarea = this.textarea[0]
-    window.log(this.textarea)
 
     this.mode = 'normal'
-    this.cursor =
-      x: 0
-      y: 0
 
-    # Event "loop"
+    this.setSelection()
+
+    this.eventLoop()
+
+  # Event "loop"
+
+  eventLoop: ->
 
     $(this.textarea).keypress (e) =>
 
@@ -29,7 +31,7 @@ class Vimify
         when 'normal'
           this.normalCommand(c)
         when 'insert'
-          return true
+          this.insertBeforeCursor(c)
         else
           window.log('Error: WTF error: '+c)
 
@@ -60,15 +62,17 @@ class Vimify
 
   escape: ->
     this.mode = 'normal'
+    if this.getXY()[0] > 1
+      this.setSelection(this.textarea.selectionStart-1)
 
   moveCursor: (xx, yy) ->
-    [x, y] = this.getXYFromSelectionStart()
+    [x, y] = this.getXY()
     this.setSelection(this.getSelectionStartFromXY(x+xx,y+yy))
 
   countInstances: (string, substring) ->
     string.split(substring).length - 1
 
-  getXYFromSelectionStart: ->
+  getXY: ->
 
     val = $(this.textarea).val()
 
@@ -88,7 +92,7 @@ class Vimify
     if x < 1 or y < 1
       return
 
-    # Set position
+    # Determine position
 
     re = /^.*?\n/
     v = val
@@ -113,8 +117,18 @@ class Vimify
     n
 
   setSelection: (n) ->
+    n = this.textarea.selectionStart unless n?
+
     window.log('setting selection: '+n)
-    this.textarea.selectionStart = this.textarea.selectionEnd = n
+    this.textarea.selectionStart = n
+    this.textarea.selectionEnd = n+1
+
+  insertBeforeCursor: (c) ->
+    val = $(this.textarea).val()
+    selStart = this.textarea.selectionStart
+    newVal = val.substring(0,selStart) + c + val.substring(selStart)
+    $(this.textarea).val(newVal)
+    this.setSelection(selStart+1)
 
 jQuery.fn.vimify = ->
   new Vimify(this)
